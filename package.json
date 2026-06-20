@@ -19,7 +19,7 @@
   "author": "Emiliano Román",
   "license": "MIT",
   "devDependencies": {
-    "style-dictionary": "^3.9.2",
+    "style-dictionary": "3.9.2"
     "nodemon": "^3.0.0"
   }
 }
