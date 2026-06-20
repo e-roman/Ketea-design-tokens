@@ -1,0 +1,25 @@
+{
+  "name": "@ketea/tokens",
+  "version": "1.0.0",
+  "description": "Design tokens del sistema de diseño Ketea S.A.",
+  "main": "dist/tokens.js",
+  "files": [
+    "dist/",
+    "tokens/"
+  ],
+  "scripts": {
+    "build": "style-dictionary build --config style-dictionary.config.js",
+    "watch": "nodemon --watch tokens --ext json --exec 'npm run build'"
+  },
+  "keywords": [
+    "design-tokens",
+    "design-system",
+    "ketea"
+  ],
+  "author": "Emiliano Román",
+  "license": "MIT",
+  "devDependencies": {
+    "style-dictionary": "^3.9.2",
+    "nodemon": "^3.0.0"
+  }
+}
