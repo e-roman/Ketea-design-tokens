@@ -1,181 +1,185 @@
-# @ketea/tokens
+![Ketea Design System](./assets/cover-tokens.svg)
 
-Design tokens del sistema de diseño **Ketea S.A.** — ecommerce de equipamiento para piletas.
+# Ketea Design System — Token Infrastructure
 
-Generados desde Figma vía [Tokens Studio](https://tokens.studio/) y transformados con [Style Dictionary](https://amzn.github.io/style-dictionary/).
+Design token pipeline for [Ketea](https://tienda-ketea.vercel.app) — an Argentine e-commerce specializing in pool equipment. Tokens authored once as DTCG, synced from Figma via Tokens Studio, generated to CSS and Tailwind through Style Dictionary.
 
 ---
 
-## Instalación
+## What's in this repo
 
-```bash
-npm install @ketea/tokens
-# o
-yarn add @ketea/tokens
+```
+tokens/
+  ketea-tokens-final.json   ← single source of truth (Tokens Studio format)
+style-dictionary/
+  config.js                 ← Style Dictionary build config
+output/
+  css/tokens.css            ← CSS custom properties
+  tailwind/tokens.js        ← Tailwind theme extension
+.github/
+  workflows/build.yml       ← Auto-build on push to main
 ```
 
 ---
 
-## Uso
+## Token architecture
 
-### CSS Variables
+Three layers, each depending only on the one above it:
+
+```
+Primitives  →  color.Blue.600 = #385DBE
+                 ↓
+Semantic    →  color.Semantic.brand-primary = {color.Blue.600}
+                 ↓
+Component   →  Button.background = {color.Semantic.brand-primary}
+```
+
+Components only consume semantic tokens — never primitives directly. Changing a primitive propagates through the entire system automatically.
+
+---
+
+## Collections (305 variables)
+
+| Collection | Variables | Description |
+|---|---|---|
+| `color` | ~200 | Primitives: Blue, Amber, Red, Green, Grey, White, Black |
+| `color.Semantic` | ~40 | Role aliases: brand, surface, text, border, feedback, commerce |
+| `spacing` | 18 | Base-4 scale: 4px → 128px |
+| `radius` | 8 | none → full (9999px) |
+| `shadow` | 6 | xs → xl + focus ring |
+| `font` | ~30 | family, weight, size, lineHeight, letterSpacing |
+| `border` | 4 | width: default, medium, thick, focus |
+| `opacity` | 3 | disabled (0.4), overlay (0.45), hover (0.08) |
+
+---
+
+## Semantic token groups
+
+### Brand
+| Token | Value | Use |
+|---|---|---|
+| `color.Semantic.brand-primary` | `Blue.600` (#385DBE) | CTAs, links, focus rings |
+| `color.Semantic.brand-primary-hover` | `Blue.700` | Hover state on primary elements |
+| `color.Semantic.brand-primary-subtle` | `Blue.50` | Active chip backgrounds, selection |
+| `color.Semantic.brand-accent` | `Amber.500` | Discount badges, promo |
+
+### Commerce (ecommerce-specific)
+| Token | Value | Use |
+|---|---|---|
+| `color.Commerce.price-current` | `Grey.700` | Current product price |
+| `color.Commerce.price-original` | `Grey.300` | Strikethrough / previous price |
+| `color.Commerce.price-discount` | `Amber.500` | Discount percentage |
+| `color.Commerce.shipping-free` | `Green.600` | "Envío Gratis" label |
+| `color.Commerce.stock-low` | `Amber.600` | "Último en stock" |
+| `color.Commerce.stock-unavailable` | `Red.600` | "Sin Stock" |
+
+### Feedback
+| Token | Use |
+|---|---|
+| `color.Semantic.feedback-error-*` | Form validation errors |
+| `color.Semantic.feedback-success-*` | Order confirmation, stock ok |
+| `color.Semantic.feedback-warning-*` | Low stock, expiring promo |
+
+---
+
+## How to use tokens in code
+
+### CSS custom properties
 
 ```css
-/* En tu entry point (index.css / globals.css) */
-@import '@ketea/tokens/dist/tokens.css';
+/* output/css/tokens.css is auto-generated — import it once */
+@import './tokens/css/tokens.css';
 
-/* Uso en componentes */
-.button-primary {
-  background-color: var(--color-brand-700);
+.btn-primary {
+  background: var(--color-semantic-brand-primary);
   color: var(--color-white);
   border-radius: var(--radius-md);
-  padding: var(--spacing-3) var(--spacing-6);
+  height: var(--size-touch-min); /* 44px — WCAG 2.5.5 */
 }
 ```
 
-### JavaScript / TypeScript
-
-```js
-import tokens from '@ketea/tokens/dist/tokens.js';
-
-const brandColor = tokens.color.brand[700]; // '#385DBE'
-const spacingMd  = tokens.spacing[4];       // '16px'
-```
-
-### Tailwind CSS
+### Tailwind
 
 ```js
 // tailwind.config.js
-const keteaTokens = require('@ketea/tokens/dist/tailwind-tokens');
+const tokens = require('./tokens/tailwind/tokens.js');
 
 module.exports = {
   theme: {
-    extend: {
-      ...keteaTokens,
-    },
+    extend: tokens,
   },
 };
+```
 
-// Uso en JSX
-// <button className="bg-brand-700 text-white rounded-md px-6 py-3">
+```html
+<button class="bg-brand-primary text-white rounded-md h-touch-min">
+  Agregar al carrito
+</button>
+```
+
+### React + TypeScript
+
+```tsx
+import tokens from './tokens/ketea-tokens-final.json';
+
+const brandColor = tokens.color.Semantic['brand-primary'].value;
 ```
 
 ---
 
-## Estructura de tokens
+## Sync workflow
 
-| Grupo | Variables | Descripción |
-|---|---|---|
-| `color/*` | 212 | Paleta primitiva (Neutral, Blue-brand, Brand, Semantic, etc.) |
-| `color/Semantic/*` | 42 | Tokens semánticos (surface, text, border, icon, feedback, forms) |
-| `color/Brand/*` | 14 | Brand scale + Default / Hover / Subtle |
-| `spacing/*` | 17 | Sistema de espaciado (4px base) |
-| `radius/*` | 8 | Border radius (none → full) |
-| `border/*` | 4 | Border widths (sm / md / lg / focus) |
-| `opacity/*` | 3 | disabled / overlay / hover |
-| `size/*` | 8 | Sizing (icons, touch targets, containers) |
-| `font/*` | 30 | Family / weight / size / lineHeight |
-| `breakpoint/*` | 3 | sm / md / lg / xl |
-| `grid/*` | 9 | Columnas y gutters por breakpoint |
-| `z/*` | 8 | Z-index scale |
-
-**Total: 305 variables en colección `global`.**
-
----
-
-## Tokens semánticos — referencia rápida
-
-| Token | CSS Variable | Tailwind class | Valor resuelto |
-|---|---|---|---|
-| `Semantic/surface-page` | `--color-semantic-surface-page` | `bg-surface-page` | `#FAFAFA` |
-| `Semantic/surface-default` | `--color-semantic-surface-default` | `bg-surface-default` | `#FFFFFF` |
-| `Semantic/text-primary` | `--color-semantic-text-primary` | `text-text-primary` | `#171717` |
-| `Semantic/text-secondary` | `--color-semantic-text-secondary` | `text-text-secondary` | `#525252` |
-| `Semantic/text-link` | `--color-semantic-text-link` | `text-text-link` | `#385DBE` |
-| `Semantic/border-focus` | `--color-semantic-border-focus` | `border-border-focus` | `#385DBE` |
-| `Semantic/feedback-error-text` | `--color-semantic-feedback-error-text` | `text-feedback-error-text` | `#B91C1C` |
-| `Brand/Default` | `--color-brand-default` | `bg-brand-default` | `#385DBE` |
-| `Brand/Hover` | `--color-brand-hover` | `bg-brand-hover` | `#2A4A9E` |
-
----
-
-## Sombras — Effect Styles
-
-> **Nota de arquitectura:** Los tokens de sombra (`shadow/xs` → `shadow/focus`) están definidos en el JSON de tokens y en el `tailwind.config.js`, pero en Figma viven como **Effect Styles** (no como Variables). Esto es una decisión deliberada: Figma no soporta nativamente el tipo `boxShadow` en Variables locales (solo `color`, `number`, `string`, y `boolean`). En el momento en que Figma lo soporte de forma nativa, la migración consiste en convertir los Effect Styles existentes a Variables y re-bindear los componentes.
-
-**Los valores están disponibles en código** desde ya:
-
-```css
-/* CSS Variables generadas por Style Dictionary */
---shadow-xs:    0 1px 2px 0 rgba(0,0,0,0.05);
---shadow-sm:    0 1px 3px 0 rgba(0,0,0,0.08);
---shadow-md:    0 4px 6px -1px rgba(0,0,0,0.10);
---shadow-lg:    0 10px 15px -3px rgba(0,0,0,0.10);
---shadow-xl:    0 20px 25px -5px rgba(0,0,0,0.12);
---shadow-focus: 0 0 0 3px #CDDAF5;
-```
-
-```js
-// Tailwind
-// shadow-sm, shadow-md, shadow-lg, shadow-xl
-// shadow-focus → usado en :focus-visible de todos los componentes interactivos
-```
-
-**En Figma:** abrí el panel de Assets → Effect Styles → grupo **Shadow** para aplicar a componentes.
-
----
-
-## Focus ring
-
-El sistema usa un focus ring de `3px` con color `Blue-brand/200` (`#CDDAF5`) — derivado de la paleta primaria de Ketea.
-
-```css
-/* Aplicación estándar en componentes interactivos */
-:focus-visible {
-  outline: none;
-  box-shadow: var(--shadow-focus);
-  border-color: var(--color-brand-default);
-}
-```
-
-En Figma están documentados como Effect Styles bajo **Focus ring** → `4px primary-100`, `4px error-100`, `4px primary-600`.
-
----
-
-## Pipeline de actualización
+Tokens live in Figma and sync bidirectionally via Tokens Studio → GitHub.
 
 ```
-Figma Variables (Tokens Studio)
-        ↓  push automático
-GitHub repo (ketea-design-tokens)
-        ↓  GitHub Action
-Style Dictionary → dist/tokens.css · tokens.js · tailwind-tokens.js
-        ↓  CI/CD
-NPM @ketea/tokens@x.x.x
-        ↓  npm update
-App en producción — el cambio aplica sin tocar código
+Figma Variables
+      ↕  (Tokens Studio plugin)
+GitHub (this repo) → main branch
+      ↓  (GitHub Actions on push)
+Style Dictionary build
+      ↓
+output/css/tokens.css
+output/tailwind/tokens.js
 ```
 
----
-
-## Changelog
-
-### v1.0.0 — 2026-06
-- Colección inicial: 305 variables en colección `global`
-- Brand color establecido en `#385DBE` (Blue-brand/700) — paleta propia de Ketea
-- Tipografía: **Mulish** para sans y display, JetBrains Mono para código
-- Shadows y focus rings definidos como Effect Styles (pendiente migración a Variables cuando Figma soporte `boxShadow` nativo)
-- Semantic tokens completos: surface, text, border, icon, feedback (4 estados), forms
-- Limpieza de variables duplicadas — colección unificada bajo prefijo `color/`
+To update tokens:
+1. Edit variables in Figma
+2. Tokens Studio → Push to GitHub
+3. GitHub Actions builds the output automatically
+4. Import updated CSS/Tailwind in the frontend project
 
 ---
 
-## Contribución
+## Figma file
 
-Los tokens se editan **únicamente desde Figma** vía Tokens Studio. No editar el JSON a mano.
+- **Design System:** [Figma — Ketea DS](https://www.figma.com/design/lXKFv02FouHJOUG9Qrsib2)
+- **Live site:** [tienda-ketea.vercel.app](https://tienda-ketea.vercel.app)
+- **Portfolio case study:** [emilianoroman.com.ar/projects/ketea-website](https://www.emilianoroman.com.ar/projects/ketea-website)
 
-1. Abrí el plugin Tokens Studio en Figma
-2. Realizá los cambios en Variables o en el panel de Tokens Studio
-3. Push al repo desde el plugin (Settings → Sync → GitHub)
-4. La GitHub Action corre Style Dictionary automáticamente
-5. Revisá el PR generado y mergeá
+---
+
+## Accessibility
+
+Color tokens are audited against WCAG 2.1 AA:
+- Text on `surface-default` (white): all text tokens pass 4.5:1 minimum
+- White text on `brand-primary` (#385DBE): ~4.7:1 — passes AA
+- `feedback-error-text` on `feedback-error-bg`: passes AA
+- Touch targets: `size.touch-min` = 44px (WCAG 2.5.5)
+
+---
+
+## Stack
+
+| Tool | Role |
+|---|---|
+| Figma + Variables | Single source of truth for design |
+| Tokens Studio | Figma ↔ GitHub sync |
+| Style Dictionary | Token transformation to CSS/JS |
+| GitHub Actions | Auto-build pipeline |
+| Tailwind CSS | Frontend consumption |
+| React / Next.js | Component implementation |
+
+---
+
+*Emiliano Román — UX/UI Designer & Design Technologist — Buenos Aires, Argentina*
+*[emilianoroman.com.ar](https://www.emilianoroman.com.ar)*
