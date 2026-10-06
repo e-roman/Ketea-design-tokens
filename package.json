@@ -1,14 +1,24 @@
 {
   "name": "@ketea/tokens",
-  "version": "1.0.0",
-  "description": "Design tokens del sistema de diseño Ketea S.A.",
-  "main": "dist/tokens.js",
-  "scripts": {
-    "build": "style-dictionary build --config style-dictionary.config.js"
-  },
+  "version": "1.1.0",
+  "description": "Design tokens for Ketea: single source of truth for color, spacing, typography, radius, shadow and sizing.",
   "author": "Emiliano Román",
   "license": "MIT",
-  "dependencies": {
-    "style-dictionary": "3.9.2"
+  "private": true,
+  "files": [
+    "dist",
+    "tokens"
+  ],
+  "exports": {
+    "./tokens.css": "./dist/tokens.css",
+    "./tokens.js": "./dist/tokens.js",
+    "./tailwind": "./dist/tailwind-tokens.js"
+  },
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@tokens-studio/sd-transforms": "^1.3.0",
+    "style-dictionary": "^4.4.0"
   }
 }

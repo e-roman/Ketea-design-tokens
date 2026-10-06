@@ -1,0 +1,130 @@
+import StyleDictionary from 'style-dictionary';
+import { fileHeader, formattedVariables } from 'style-dictionary/utils';
+import { register } from '@tokens-studio/sd-transforms';
+
+// Tokens Studio types (spacing, sizing, fontFamilies, lineHeights %, unitless numbers) → CSS-ready values.
+register(StyleDictionary);
+
+const PREFIX = 'ketea';
+const HEX = /^#([0-9a-f]{6})$/i;
+const channels = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+};
+const isOpaque = (t) => t.$type === 'color' && HEX.test(String(t.$value));
+const cssVar = (t) => `var(--${t.name})`;
+const color = (t) => (isOpaque(t) ? `rgb(var(--${t.name}-rgb) / <alpha-value>)` : cssVar(t));
+
+/** CSS custom properties with references + RGB channels for Tailwind opacity modifiers. */
+StyleDictionary.registerFormat({
+  name: 'css/variables-with-rgb',
+  format: async ({ dictionary, file }) => {
+    const header = await fileHeader({ file });
+    const vars = formattedVariables({ format: 'css', dictionary, outputReferences: true, usesDtcg: true });
+    const rgb = dictionary.allTokens.filter(isOpaque).map((t) => `  --${t.name}-rgb: ${channels(t.$value)};`).join('\n');
+    return `${header}:root {\n${vars}\n\n  /* RGB channels for Tailwind opacity modifiers */\n${rgb}\n}\n`;
+  },
+});
+
+/**
+ * Tailwind preset (CJS). Semantic tokens map to per-utility names:
+ *   color.Semantic.surface-default         → bg-default
+ *   color.Semantic.text-secondary          → text-secondary
+ *   color.Semantic.border-strong           → border-strong
+ *   color.Semantic.feedback-error-bg       → bg-error-subtle   (-text → text-error, -border → border-error)
+ *   color.Semantic.forms-border-focus      → border-input-focus
+ *   color.Brand.Default / Hover / Subtle   → bg-brand, hover:bg-brand-hover, bg-brand-subtle
+ */
+StyleDictionary.registerFormat({
+  name: 'tailwind/preset',
+  format: ({ dictionary }) => {
+    const all = dictionary.allTokens;
+    const at = (...p) => all.filter((t) => p.every((seg, i) => t.path[i] === seg));
+
+    const backgroundColor = {}, textColor = {}, borderColor = {}, placeholderColor = {};
+    for (const t of at('color', 'Semantic')) {
+      const k = t.path[2];
+      let m;
+      if ((m = k.match(/^surface-(.+)$/))) backgroundColor[m[1]] = color(t);
+      else if ((m = k.match(/^text-(.+)$/))) textColor[m[1]] = color(t);
+      else if ((m = k.match(/^border-(.+)$/))) borderColor[m[1]] = color(t);
+      else if ((m = k.match(/^icon-(.+)$/))) textColor[`icon-${m[1]}`] = color(t);
+      else if ((m = k.match(/^feedback-(\w+)-(text|bg|border)$/))) {
+        const [, kind, prop] = m;
+        if (prop === 'text') textColor[kind] = color(t);
+        if (prop === 'bg') backgroundColor[`${kind}-subtle`] = color(t);
+        if (prop === 'border') borderColor[kind] = color(t);
+      } else if ((m = k.match(/^forms-bg(?:-(.+))?$/))) backgroundColor[m[1] ? `input-${m[1]}` : 'input'] = color(t);
+      else if ((m = k.match(/^forms-border(?:-(.+))?$/))) borderColor[m[1] ? `input-${m[1]}` : 'input'] = color(t);
+      else if (k === 'forms-text-placeholder') placeholderColor.input = color(t);
+      else if (k === 'forms-text-disabled') textColor['input-disabled'] = color(t);
+    }
+
+    const colors = {};
+    for (const t of at('color')) {
+      const [, group, step] = t.path;
+      if (group === 'Semantic' || group === 'Blue-brand') continue;
+      if (!step) { colors[group.toLowerCase()] = color(t); continue; }
+      const key = group === 'Brand' && isNaN(+step) ? (step === 'Default' ? 'DEFAULT' : step.toLowerCase()) : step;
+      (colors[group.toLowerCase()] ??= {})[key] = color(t);
+    }
+
+    const map = (group, fn = (t) => t.path.at(-1)) => Object.fromEntries(at(...group).map((t) => [fn(t), cssVar(t)]));
+    const borderRadius = map(['radius'], (t) => (t.path[1] === 'sm' ? 'DEFAULT' : t.path[1]));
+    borderRadius.sm = borderRadius.DEFAULT;
+
+    const preset = {
+      theme: {
+        borderRadius,
+        boxShadow: map(['shadow']),
+        extend: {
+          colors,
+          backgroundColor,
+          textColor,
+          borderColor,
+          placeholderColor,
+          ringColor: { focus: color(at('color', 'Semantic', 'border-focus')[0]) },
+          fontFamily: Object.fromEntries(at('font', 'family').map((t) => [t.path[2], [cssVar(t), t.path[2] === 'mono' ? 'ui-monospace' : 'system-ui', t.path[2] === 'mono' ? 'monospace' : 'sans-serif']])),
+          fontWeight: map(['font', 'weight']),
+          fontSize: { md: cssVar(at('font', 'size', 'md')[0]) },
+          borderWidth: map(['border'], (t) => t.path[1].replace('width-', '')),
+          opacity: map(['opacity']),
+          spacing: Object.fromEntries(at('size').filter((t) => !t.path[1].startsWith('container')).map((t) => [t.path[1], cssVar(t)])),
+          maxWidth: Object.fromEntries(at('size').filter((t) => t.path[1].startsWith('container')).map((t) => [t.path[1], cssVar(t)])),
+        },
+      },
+    };
+    return `/** Generated by Style Dictionary from tokens/ — do not edit */\nmodule.exports = ${JSON.stringify(preset, null, 2)};\n`;
+  },
+});
+
+const sd = new StyleDictionary({
+  source: ['tokens/ketea-tokens.json'],
+  preprocessors: ['tokens-studio'],
+  usesDtcg: true,
+  log: { verbosity: 'default' },
+  platforms: {
+    css: {
+      transformGroup: 'tokens-studio',
+      transforms: ['name/kebab'],
+      prefix: PREFIX,
+      buildPath: 'dist/',
+      files: [{ destination: 'tokens.css', format: 'css/variables-with-rgb' }],
+    },
+    js: {
+      transformGroup: 'tokens-studio',
+      transforms: ['name/camel'],
+      buildPath: 'dist/',
+      files: [{ destination: 'tokens.js', format: 'javascript/es6' }],
+    },
+    tailwind: {
+      transformGroup: 'tokens-studio',
+      transforms: ['name/kebab'],
+      prefix: PREFIX,
+      buildPath: 'dist/',
+      files: [{ destination: 'tailwind-tokens.js', format: 'tailwind/preset' }],
+    },
+  },
+});
+
+await sd.buildAllPlatforms();

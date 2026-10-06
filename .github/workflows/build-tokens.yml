@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - 'tokens/**'
+      - 'build.mjs'
+  pull_request:
+    paths:
+      - 'tokens/**'
+      - 'build.mjs'
   workflow_dispatch:
 
 jobs:
@@ -19,9 +24,17 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build tokens
         run: npm run build
