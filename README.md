@@ -179,7 +179,7 @@ npm run build
 
 - **Design System:** [Figma: Ketea DS](https://www.figma.com/design/lXKFv02FouHJOUG9Qrsib2)
 - **Live site:** [tienda-ketea.vercel.app](https://tienda-ketea.vercel.app)
-- **Portfolio case study:** [emilianoroman.com.ar/projects/ketea-website](https://www.emilianoroman.com.ar/projects/ketea-website)
+- **Portfolio case study:** [emilianoroman.com.ar/projects/ketea-website](https://www.emilianoroman.com.ar/projects/ketea-sistema)
 
 ---
 
