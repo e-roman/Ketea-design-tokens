@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (2026-11-06)
+
+- Corrige el campo `version` de `package.json`, que en 2.0.0 todavía decía 1.1.0. No hay cambios en los tokens.
+
 ## 2.0.0 (2026-11-06)
 
 **Breaking**
