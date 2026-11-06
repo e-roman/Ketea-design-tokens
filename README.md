@@ -46,7 +46,7 @@ Components consume semantic tokens, never primitives directly. The CSS output ke
 
 ---
 
-## Collections (282 tokens)
+## Collections (288 tokens)
 
 | Collection | Tokens | Description |
 |---|---|---|
@@ -59,6 +59,8 @@ Components consume semantic tokens, never primitives directly. The CSS output ke
 | `font` | 24 | family (Mulish, JetBrains Mono), weight, size, lineHeight |
 | `border` | 4 | width: sm (1), md (1.5), lg (2), focus (3) |
 | `opacity` | 3 | disabled (0.4), overlay (0.45), hover (0.08) |
+| `duration` | 4 | fast (150ms), base (300ms), slow (500ms), slower (1000ms) |
+| `easing` | 2 | standard, out (cubic-bezier) |
 | `size` | 8 | touch-min (44px), icon sizes, containers |
 
 ---

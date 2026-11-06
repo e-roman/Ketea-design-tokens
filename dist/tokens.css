@@ -198,6 +198,12 @@
   --opacity-disabled: 0.4;
   --opacity-overlay: 0.45;
   --opacity-hover: 0.08;
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 1000ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
   --size-touch-min: 44px;
   --size-icon-sm: 16px;
   --size-icon-md: 20px;

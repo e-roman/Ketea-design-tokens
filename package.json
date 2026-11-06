@@ -1,6 +1,6 @@
 {
   "name": "@ketea/tokens",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Design tokens for Ketea: single source of truth for color, spacing, typography, radius, shadow and sizing.",
   "author": "Emiliano Román",
   "license": "MIT",

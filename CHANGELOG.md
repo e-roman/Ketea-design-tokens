@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0 (2026-11-06)
+
+**Nuevo: movimiento**
+
+- `duration.{fast,base,slow,slower}`: 150, 300, 500 y 1000 ms. Variables `--duration-*`.
+- `easing.{standard,out}`: `cubic-bezier(0.4, 0, 0.2, 1)` y `cubic-bezier(0, 0, 0.2, 1)`. Variables `--easing-*`.
+- Mismos nombres y valores que el sistema de Orali, para que ambos compartan la escala de movimiento.
+- Pendiente: cargarlos también en Figma (variables de Tokens Studio) para que la fuente siga siendo una sola.
+
 ## 2.0.1 (2026-11-06)
 
 - Corrige el campo `version` de `package.json`, que en 2.0.0 todavía decía 1.1.0. No hay cambios en los tokens.

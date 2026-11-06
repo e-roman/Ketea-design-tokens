@@ -297,6 +297,16 @@
     "overlay":  { "$type": "opacity", "$value": "0.45" },
     "hover":    { "$type": "opacity", "$value": "0.08" }
   },
+  "duration": {
+    "fast":   { "$type": "duration", "$value": "150ms" },
+    "base":   { "$type": "duration", "$value": "300ms" },
+    "slow":   { "$type": "duration", "$value": "500ms" },
+    "slower": { "$type": "duration", "$value": "1000ms" }
+  },
+  "easing": {
+    "standard": { "$type": "cubicBezier", "$value": [0.4, 0, 0.2, 1] },
+    "out":      { "$type": "cubicBezier", "$value": [0, 0, 0.2, 1] }
+  },
   "size": {
     "touch-min":    { "$type": "sizing", "$value": "44" },
     "icon-sm":      { "$type": "sizing", "$value": "16" },
