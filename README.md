@@ -13,7 +13,7 @@ tokens/
   ketea-tokens.json       ← single source of truth (Tokens Studio / DTCG format)
 build.mjs                 ← Style Dictionary v4 config + custom formats
 dist/                     ← generated, committed
-  tokens.css              ← CSS custom properties (--ketea-*) with references + RGB channels
+  tokens.css              ← CSS custom properties (`--color-*`, `--spacing-*`, `--radius-*`…) with references + RGB channels
   tokens.js               ← ES module, one named export per token
   tailwind-tokens.js      ← Tailwind preset with semantic utility names
 assets/
@@ -39,9 +39,9 @@ Semantic    →  color.Semantic.text-link = {color.Brand.700}
 Components consume semantic tokens, never primitives directly. The CSS output keeps the reference chain, so changing a primitive propagates through the whole system:
 
 ```css
---ketea-color-blue-brand-700: #385dbe;
---ketea-color-brand-700: var(--ketea-color-blue-brand-700);
---ketea-color-semantic-text-link: var(--ketea-color-brand-700);
+--color-blue-brand-700: #385dbe;
+--color-brand-700: var(--color-blue-brand-700);
+--color-semantic-text-link: var(--color-brand-700);
 ```
 
 ---
@@ -99,10 +99,10 @@ Components consume semantic tokens, never primitives directly. The CSS output ke
 @import "@ketea/tokens/tokens.css";
 
 .btn-primary {
-  background: var(--ketea-color-brand-default);
-  color: var(--ketea-color-semantic-text-on-brand);
-  border-radius: var(--ketea-radius-md);
-  min-height: var(--ketea-size-touch-min); /* 44px */
+  background: var(--color-brand-default);
+  color: var(--color-semantic-text-on-brand);
+  border-radius: var(--radius-md);
+  min-height: var(--size-touch-min); /* 44px */
 }
 ```
 
@@ -136,7 +136,7 @@ module.exports = {
 | `radius.*` / `shadow.*` | `rounded-md`, `shadow-focus`… (replace Tailwind's scales) |
 | `size.*` | `h-touch-min`, `w-icon-md`, `max-w-container-xl` |
 
-Every opaque color also ships as RGB channels (`--ketea-color-brand-default-rgb: 56 93 190`), so opacity modifiers like `bg-brand/10` work.
+Every opaque color also ships as RGB channels (`--color-brand-default-rgb: 56 93 190`), so opacity modifiers like `bg-brand/10` work.
 
 > **Note:** the preset replaces Tailwind's `borderRadius` and `boxShadow` scales. Ketea's `rounded-md` is 8px, not Tailwind's default 6px.
 

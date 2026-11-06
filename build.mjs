@@ -5,7 +5,7 @@ import { register } from '@tokens-studio/sd-transforms';
 // Tokens Studio types (spacing, sizing, fontFamilies, lineHeights %, unitless numbers) → CSS-ready values.
 register(StyleDictionary);
 
-const PREFIX = 'ketea';
+const PREFIX = '';
 const HEX = /^#([0-9a-f]{6})$/i;
 const channels = (hex) => {
   const n = parseInt(hex.slice(1), 16);
