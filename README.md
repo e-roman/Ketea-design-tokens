@@ -46,11 +46,11 @@ Components consume semantic tokens, never primitives directly. The CSS output ke
 
 ---
 
-## Collections (288 tokens)
+## Collections (180 tokens)
 
 | Collection | Tokens | Description |
 |---|---|---|
-| `color` (primitives) | 156 | 14 ramps × 11 steps (Neutral, Slate, Rose, Pink, Purple, Violet, Blue-brand, Indigo, Blue, Sky, Green, Yellow, Orange, Red) + White, Black |
+| `color` (primitives) | 48 | Neutral and Blue-brand (11 steps, 50–950) + status hues Green, Yellow, Red and Blue (6 steps: 50, 100, 300, 500, 700, 900) + White, Black |
 | `color.Brand` | 14 | Alias of Blue-brand (50–950) + `Default`, `Hover`, `Subtle` |
 | `color.Semantic` | 42 | surface, text, border, icon, feedback, forms |
 | `spacing` | 17 | Base-4 scale: 4px → 256px |
